@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ski Resort Weather Checker</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+        }
+        
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .search-form {
+            margin-bottom: 30px;
+        }
+        
+        .search-form input {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 300px;
+            margin-right: 10px;
+        }
+        
+        .search-form button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .search-form button:hover {
+            background-color: #2980b9;
+        }
+        
+        .error {
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+        
+        .weather-overview {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #ecf0f1;
+            border-radius: 8px;
+        }
+        
+        .forecast-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .forecast-day {
+            flex: 1;
+            min-width: 150px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .forecast-day img {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .snow-analysis {
+            background-color: #e8f4fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            border-left: 5px solid #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ski Resort Weather Checker</h1>
+        
+        <div class="search-form">
+            <form action="/weather" method="POST">
+                <input 
+                    type="text" 
+                    name="resort" 
+                    placeholder="Enter ski resort name" 
+                    required
+                >
+                <button type="submit">Check Weather</button>
+            </form>
+        </div>
+        
+        <% if (error) { %>
+            <div class="error">
+                <p><%= error %></p>
+            </div>
+        <% } %>
+        
+        <% if (weather) { %>
+            <div class="weather-overview">
+                <h2>Weather Forecast for <%= weather.resort %></h2>
+                <p>Current temperature: <%= weather.current.temp %>°C</p>
+                <p>Current conditions: <%= weather.current.weather[0].description %></p>
+            </div>
+            
+            <h3>7-Day Forecast</h3>
+            <div class="forecast-container">
+                <% weather.daily.forEach((day, index) => { %>
+                    <div class="forecast-day">
+                        <h4><%= new Date(day.dt * 1000).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) %></h4>
+                        <img src="https://openweathermap.org/img/wn/<%= day.weather[0].icon %>@2x.png" alt="<%= day.weather[0].description %>">
+                        <p><%= day.weather[0].description %></p>
+                        <p>High: <%= day.temp.max %>°C</p>
+                        <p>Low: <%= day.temp.min %>°C</p>
+                        <% if (day.snow) { %>
+                            <p>Snow: <%= day.snow %> mm</p>
+                        <% } %>
+                        <p>Precipitation: <%= (day.pop * 100).toFixed(0) %>%</p>
+                    </div>
+                <% }); %>
+            </div>
+            
+            <div class="snow-analysis">
+                <h3>Snow Conditions Analysis</h3>
+                <p><%= weather.snowAnalysis.analysis %></p>
+                <p>Expected snow days: <%= weather.snowAnalysis.snowDays %> out of 7</p>
+                <% if (weather.snowAnalysis.totalSnow > 0) { %>
+                    <p>Total expected snowfall: <%= weather.snowAnalysis.totalSnow %> mm</p>
+                <% } %>
+                <p>Temperature range: <%= weather.snowAnalysis.lowestTemp %>°C to <%= weather.snowAnalysis.highestTemp %>°C</p>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>
