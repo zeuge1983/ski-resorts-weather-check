@@ -65,7 +65,3 @@ A Node.js application that provides weather forecasts and snow condition analysi
    - Total expected snowfall
    - Temperature range
    - Overall snow condition assessment
-
-## License
-
-MIT
