@@ -18,31 +18,32 @@ A Node.js application that provides weather forecasts and snow condition analysi
 ## Installation
 
 1. Clone this repository:
+
    ```
    git clone https://github.com/yourusername/ski-resort-weather-checker.git
    cd ski-resort-weather-checker
    ```
 
 2. Install dependencies:
+
    ```
    npm install
    ```
 
 3. Create a `.env` file in the root directory and add your OpenWeatherMap API key:
+
    ```
    WEATHER_API_KEY=your_api_key_here
    ```
 
    You can get a free API key by signing up at [OpenWeatherMap](https://openweathermap.org/api).
 
-4. Update the API key in `index.js`:
-   ```javascript
-   const WEATHER_API_KEY = 'YOUR_OPENWEATHERMAP_API_KEY';
-   ```
+   **Important**: The application will use mock data if no valid API key is provided. To get real weather data, you must use a valid OpenWeatherMap API key.
 
 ## Usage
 
 1. Start the application:
+
    ```
    npm start
    ```
