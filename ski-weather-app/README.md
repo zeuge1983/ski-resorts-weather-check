@@ -54,6 +54,23 @@ A Node.js application that provides weather forecasts and snow condition analysi
 
 4. View the 7-day forecast and snow condition analysis
 
+## Testing
+
+The application includes a comprehensive test suite using Jest. To run the tests:
+
+```
+npm test
+```
+
+The test suite includes:
+
+- Unit tests for the snow condition analyzer
+- Unit tests for the mock data provider
+- Integration tests for the Express routes
+- Utility function tests
+
+To add more tests, create new test files in the `tests` directory following the Jest naming convention (`*.test.js`).
+
 ## How It Works
 
 1. The application uses the OpenWeatherMap Geocoding API to convert the ski resort name into latitude and longitude coordinates.
