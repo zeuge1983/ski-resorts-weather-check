@@ -15,8 +15,9 @@
             background-color: #f5f7fa;
         }
         
-        h1, h2, h3 {
+        h1, h2, h3, h4 {
             color: #2c3e50;
+            margin-bottom: 1rem;
         }
         
         .container {
@@ -58,6 +59,9 @@
         .error {
             color: #e74c3c;
             margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fde8e8;
+            border-radius: 4px;
         }
         
         .weather-overview {
@@ -65,6 +69,48 @@
             padding: 20px;
             background-color: #ecf0f1;
             border-radius: 8px;
+        }
+
+        .current-weather {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .ai-analysis {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .ai-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        
+        .snow-conditions {
+            background-color: #e8f7ff;
+            border-left: 4px solid #3498db;
+        }
+        
+        .best-days {
+            background-color: #e8fff0;
+            border-left: 4px solid #2ecc71;
+        }
+        
+        .resort-choice {
+            background-color: #fff5e8;
+            border-left: 4px solid #f39c12;
+        }
+        
+        .skier-advice {
+            background-color: #ffebef;
+            border-left: 4px solid #e74c3c;
         }
         
         .forecast-container {
@@ -83,75 +129,84 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
-        
-        .forecast-day img {
-            width: 50px;
-            height: 50px;
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
         }
-        
-        .snow-analysis {
-            background-color: #e8f4fd;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 30px;
-            border-left: 5px solid #3498db;
+
+        .section-heading h3 {
+            margin: 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Ski Resort Weather Checker</h1>
-        
-        <div class="search-form">
-            <form action="/weather" method="POST">
-                <input 
-                    type="text" 
-                    name="resort" 
-                    placeholder="Enter ski resort name" 
-                    required
-                >
-                <button type="submit">Check Weather</button>
-            </form>
-        </div>
+        <form class="search-form" action="/weather" method="POST">
+            <input type="text" name="resort" placeholder="Enter ski resort name" required>
+            <button type="submit">Check Weather</button>
+        </form>
         
         <% if (error) { %>
-            <div class="error">
-                <p><%= error %></p>
-            </div>
+            <div class="error"><%= error %></div>
         <% } %>
-        
+
         <% if (weather) { %>
             <div class="weather-overview">
-                <h2>Weather Forecast for <%= weather.resort %></h2>
-                <p>Current temperature: <%= weather.current.temp %>°C</p>
-                <p>Current conditions: <%= weather.current.weather[0].description %></p>
-            </div>
-            
-            <h3>7-Day Forecast</h3>
-            <div class="forecast-container">
-                <% weather.daily.forEach((day, index) => { %>
-                    <div class="forecast-day">
-                        <h4><%= new Date(day.dt * 1000).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) %></h4>
-                        <img src="https://openweathermap.org/img/wn/<%= day.weather[0].icon %>@2x.png" alt="<%= day.weather[0].description %>">
-                        <p><%= day.weather[0].description %></p>
-                        <p>High: <%= day.temp.max %>°C</p>
-                        <p>Low: <%= day.temp.min %>°C</p>
-                        <% if (day.snow) { %>
-                            <p>Snow: <%= day.snow %> mm</p>
+                <h2><%= weather.resort %></h2>
+                <div class="current-weather">
+                    <h3>Current Conditions</h3>
+                    <p>Temperature: <%= weather.current.temp.toFixed(1) %>°C</p>
+                    <p>Weather: <%= weather.current.weather[0].description %></p>
+                    <p>Wind Speed: <%= weather.current.wind_speed %> m/s</p>
+                    <% if (weather.current.snow) { %>
+                        <p>Fresh Snow: <%= weather.current.snow %> mm</p>
+                    <% } %>
+                </div>
+
+                <% if (weather.aiAnalysis && weather.aiAnalysis.structured) { %>
+                    <div class="ai-analysis">
+                        <h3>🤖 AI Resort Analysis</h3>
+                        
+                        <div class="ai-section snow-conditions">
+                            <h4>❄️ Snow Conditions</h4>
+                            <p><%= weather.aiAnalysis.structured.snowConditions %></p>
+                        </div>
+                        
+                        <div class="ai-section best-days">
+                            <h4>📅 Best Days to Ski</h4>
+                            <p><%= weather.aiAnalysis.structured.bestDays %></p>
+                        </div>
+                        
+                        <% if (weather.aiAnalysis.structured.alternativeResorts) { %>
+                            <div class="ai-section resort-choice">
+                                <h4>🗺️ Resort Recommendations</h4>
+                                <p><%= weather.aiAnalysis.structured.alternativeResorts %></p>
+                            </div>
                         <% } %>
-                        <p>Precipitation: <%= (day.pop * 100).toFixed(0) %>%</p>
+                        
+                        <div class="ai-section skier-advice">
+                            <h4>🎿 Skier Advice</h4>
+                            <p><%= weather.aiAnalysis.structured.advice %></p>
+                        </div>
                     </div>
-                <% }); %>
-            </div>
-            
-            <div class="snow-analysis">
-                <h3>Snow Conditions Analysis</h3>
-                <p><%= weather.snowAnalysis.analysis %></p>
-                <p>Expected snow days: <%= weather.snowAnalysis.snowDays %> out of 7</p>
-                <% if (weather.snowAnalysis.totalSnow > 0) { %>
-                    <p>Total expected snowfall: <%= weather.snowAnalysis.totalSnow %> mm</p>
                 <% } %>
-                <p>Temperature range: <%= weather.snowAnalysis.lowestTemp %>°C to <%= weather.snowAnalysis.highestTemp %>°C</p>
+
+                <div class="forecast-container">
+                    <% weather.daily.slice(0, 5).forEach(day => { %>
+                        <div class="forecast-day">
+                            <h4><%= new Date(day.dt * 1000).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) %></h4>
+                            <p>Temperature: <%= day.temp.day.toFixed(1) %>°C</p>
+                            <p>Range: <%= day.temp.min.toFixed(1) %>°C to <%= day.temp.max.toFixed(1) %>°C</p>
+                            <p>Weather: <%= day.weather[0].description %></p>
+                            <% if (day.snow) { %>
+                                <p>Snow: <%= day.snow %> mm</p>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                </div>
             </div>
         <% } %>
     </div>

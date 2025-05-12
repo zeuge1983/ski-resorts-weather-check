@@ -4,6 +4,7 @@ const axios = require('axios');
 const path = require('path');
 const mockData = require('./mockData');
 const { analyzeSnowConditions } = require('./snowAnalyzer');
+const { analyzeResortConditions } = require('./resortAnalyzer');
 
 const app = express();
 const PORT = process.env.PORT || 12000;
@@ -91,13 +92,20 @@ app.post('/weather', async (req, res) => {
       const forecastList = weatherResponse.data.list;
       const dailyData = [];
       const dayMap = {};
+      let daysProcessed = 0;
+      const MAX_DAYS = 5;
       
       // Group forecast by day
-      forecastList.forEach(item => {
+      for (const item of forecastList) {
+        if (daysProcessed >= MAX_DAYS) break;
+        
         const date = new Date(item.dt * 1000);
         const day = date.toISOString().split('T')[0];
         
         if (!dayMap[day]) {
+          if (daysProcessed >= MAX_DAYS) break;
+          daysProcessed++;
+          
           dayMap[day] = {
             dt: item.dt,
             sunrise: currentWeatherResponse.data.sys.sunrise,
@@ -139,7 +147,7 @@ app.post('/weather', async (req, res) => {
             dayMap[day].pop = item.pop;
           }
         }
-      });
+      }
       
       // Create a structure similar to the One Call API
       weatherData = {
@@ -169,15 +177,57 @@ app.post('/weather', async (req, res) => {
     
     const dailyForecast = weatherData.daily.slice(0, 7); // Get 7 days of forecast
     
-    // Analyze snow conditions
+    // Basic snow analysis
     const snowAnalysis = analyzeSnowConditions(dailyForecast);
+
+    // Find nearby resorts (within 100km)
+    const nearbyResorts = [];
+    if (!USE_MOCK_DATA) {
+      try {
+        const nearbyResponse = await axios.get(
+          `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=10&appid=${WEATHER_API_KEY}`
+        );
+        
+        for (const location of nearbyResponse.data) {
+          if (location.name.toLowerCase() !== resort.toLowerCase()) {
+            // Calculate distance using Haversine formula
+            const distance = calculateDistance(lat, lon, location.lat, location.lon);
+            if (distance <= 100) { // Within 100km
+              nearbyResorts.push({
+                name: location.name,
+                distance: Math.round(distance)
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Error fetching nearby resorts:', error);
+      }
+    }
+
+    // Get AI-powered analysis
+    // Get AI-powered analysis
+    let aiAnalysis = null;
+    try {
+      console.log('Requesting AI analysis for:', resort);
+      aiAnalysis = await analyzeResortConditions(resort, weatherData, nearbyResorts);
+      if (aiAnalysis && aiAnalysis.structured) {
+        console.log('AI analysis successful');
+      } else {
+        console.warn('AI analysis returned null or invalid structure');
+      }
+    } catch (error) {
+      console.warn('AI analysis failed:', error);
+      // Continue with basic analysis if AI fails
+    }
 
     return res.render('index', {
       weather: {
         resort: resort,
         current: weatherData.current,
         daily: dailyForecast,
-        snowAnalysis: snowAnalysis
+        snowAnalysis: snowAnalysis,
+        aiAnalysis: aiAnalysis
       },
       error: null
     });
@@ -229,7 +279,18 @@ app.post('/weather', async (req, res) => {
   }
 });
 
-// Function moved to snowAnalyzer.js
+// Helper function to calculate distance between coordinates
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
 
 // Check if API key is set
 const USE_MOCK_DATA = !WEATHER_API_KEY || WEATHER_API_KEY === 'your_openweathermap_api_key_here';
