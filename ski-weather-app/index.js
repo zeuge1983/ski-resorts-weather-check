@@ -206,7 +206,6 @@ app.post('/weather', async (req, res) => {
     }
 
     // Get AI-powered analysis
-    // Get AI-powered analysis
     let aiAnalysis = null;
     try {
       console.log('Requesting AI analysis for:', resort);
