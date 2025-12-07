@@ -10,7 +10,6 @@ Let's examine each component in detail:
 
 AI-Powered Resort Analysis (resortAnalyzer.js) The core intelligence of the application lies in the resortAnalyzer.js file. Here's how it works:
 
-
 a. **Integration with Gemini AI:**
 
 The application uses Google's Gemini AI model (specifically 'models/gemini-1.5-flash-latest') for intelligent analysis.
@@ -20,14 +19,19 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 ```
 
 b. **Data Processing:**
+
 ```javascript
-const snowDaysCount = weatherData.daily.filter(day => day.snow > 0).length;
-const totalSnowfall = weatherData.daily.reduce((sum, day) => sum + (day.snow || 0), 0);
-const avgTemp = weatherData.daily.reduce((sum, day) => sum + day.temp.day, 0) / weatherData.daily.length;
+const snowDaysCount = weatherData.daily.filter((day) => day.snow > 0).length;
+const totalSnowfall = weatherData.daily.reduce(
+  (sum, day) => sum + (day.snow || 0),
+  0,
+);
+const avgTemp =
+  weatherData.daily.reduce((sum, day) => sum + day.temp.day, 0) /
+  weatherData.daily.length;
 ```
 
 Calculates key metrics from weather data. Tracks snow days, total snowfall, and average temperature
-
 
 c. **Structured Prompt System: The AI analysis is guided by a carefully structured prompt with four main sections:**
 
@@ -36,14 +40,20 @@ c. **Structured Prompt System: The AI analysis is guided by a carefully structur
 - RESORT CHOICE: Evaluates skiing conditions and provides alternatives
 - SKIER ADVICE: Provides equipment and safety recommendations
 
-
 d. **Response Processing:**
+
 ```javascript
 const sections = {
-  conditions: (analysis.match(/# SNOW CONDITIONS\n([\s\S]*?)(?=# BEST DAYS|$)/) || [])[1] || '',
-  bestDays: (analysis.match(/# BEST DAYS\n([\s\S]*?)(?=# RESORT CHOICE|$)/) || [])[1] || '',
-  alternatives: (analysis.match(/# RESORT CHOICE\n([\s\S]*?)(?=# SKIER ADVICE|$)/) || [])[1] || '',
-  advice: (analysis.match(/# SKIER ADVICE\n([\s\S]*?)(?=$)/) || [])[1] || ''
+  conditions:
+    (analysis.match(/# SNOW CONDITIONS\n([\s\S]*?)(?=# BEST DAYS|$)/) ||
+      [])[1] || "",
+  bestDays:
+    (analysis.match(/# BEST DAYS\n([\s\S]*?)(?=# RESORT CHOICE|$)/) || [])[1] ||
+    "",
+  alternatives:
+    (analysis.match(/# RESORT CHOICE\n([\s\S]*?)(?=# SKIER ADVICE|$)/) ||
+      [])[1] || "",
+  advice: (analysis.match(/# SKIER ADVICE\n([\s\S]*?)(?=$)/) || [])[1] || "",
 };
 ```
 
@@ -51,22 +61,20 @@ const sections = {
 - Cleans up formatting and removes artifacts
 - Provides fallback messages for empty section
 
-
 **Let's look at the frontend template:**
 
 Read index.ejs, lines 1 to 21
 
-
-## Frontend Implementation 
+## Frontend Implementation
 
 The frontend is built with EJS (Embedded JavaScript templating) and provides:
+
 - A clean, responsive interface
 - Sections for displaying weather data and AI analysis
 - Error handling and loading states
 - Data Flow The application works in this sequence:
 
-
-## User Journey 
+## User Journey
 
 1. User selects a ski resort
 2. Weather data is fetched (likely from OpenWeatherMap API)
@@ -75,7 +83,6 @@ The frontend is built with EJS (Embedded JavaScript templating) and provides:
 5. AI generates structured analysis
 6. Analysis is parsed and formatted
 7. Results are displayed in the EJS template
-
 
 ## Key Features
 
@@ -87,17 +94,18 @@ The frontend is built with EJS (Embedded JavaScript templating) and provides:
 - Fallback handling for missing data
 - Comprehensive error logging
 
-
 **Error Handling and Validation:**
 
 ```javascript
-const hasAllSections = Object.values(sections).every(section => section.length > 0);
+const hasAllSections = Object.values(sections).every(
+  (section) => section.length > 0,
+);
 if (!hasAllSections) {
-  console.warn('Missing sections in AI response:', {
+  console.warn("Missing sections in AI response:", {
     hasConditions: sections.conditions.length > 0,
     hasBestDays: sections.bestDays.length > 0,
     hasAlternatives: sections.alternatives.length > 0,
-    hasAdvice: sections.advice.length > 0
+    hasAdvice: sections.advice.length > 0,
   });
 }
 ```
@@ -106,7 +114,6 @@ if (!hasAllSections) {
 - Provides fallback content
 - Logs issues for debugging
 
-
 ## Recent Improvements
 
 - Enhanced prompt structure for more consistent AI responses
@@ -114,7 +121,6 @@ if (!hasAllSections) {
 - Better section parsing with regex patterns
 - Added fallback content for empty sections
 - Improved error logging and debugging capabilities
-
 
 ## The application demonstrates effective integration of:
 

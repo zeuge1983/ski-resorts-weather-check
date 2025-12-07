@@ -83,7 +83,6 @@ To add more tests, create new test files in the `tests` directory following the 
    - Temperature range
    - Overall snow condition assessment
 
-
 ## 1. Architecture Overview
 
 The application follows a simple MVC (Model-View-Controller) pattern:
@@ -102,10 +101,10 @@ The application uses:
 - Sdotenv for managing environment variables
 - SThe server is configured to:
 
-   - SServe static files from the public directory
-   - SParse form data
-   - SUse EJS templates from the views directory
-   - SRun on port 12000
+  - SServe static files from the public directory
+  - SParse form data
+  - SUse EJS templates from the views directory
+  - SRun on port 12000
 
 ## 3. Weather Data Fetching Process
 
@@ -115,8 +114,8 @@ When a user searches for a ski resort, the following happens:
 
 - The user enters a resort name (e.g., "Aspen")
 - The application creates two versions of the query:
-   - searchQuery: Just the resort name (e.g., "Aspen") - used for API calls
-   - displayQuery: Resort name with "ski resort" suffix if not already included (e.g., "Aspen ski resort") - used for display and mock data
+  - searchQuery: Just the resort name (e.g., "Aspen") - used for API calls
+  - displayQuery: Resort name with "ski resort" suffix if not already included (e.g., "Aspen ski resort") - used for display and mock data
 
 **Step 2**: Geocoding
 
@@ -138,75 +137,85 @@ When a user searches for a ski resort, the following happens:
 
 **Step 5**: Data Processing
 
-*-* The 5-day/3-hour forecast data is processed to create a daily forecast format
+_-_ The 5-day/3-hour forecast data is processed to create a daily forecast format
 For each day, we:
-   - Group all forecasts for the same day
-   - Calculate min/max temperatures
-   - Accumulate precipitation (rain and snow)
-   - Determine the highest probability of precipitation
-   - This processed data is structured to match the format our templates expect
+
+- Group all forecasts for the same day
+- Calculate min/max temperatures
+- Accumulate precipitation (rain and snow)
+- Determine the highest probability of precipitation
+- This processed data is structured to match the format our templates expect
 
 **Step 6**: Snow Condition Analysis
 
-*-* The analyzeSnowConditions function examines the forecast data to:
-   - Count expected snow days
-   - Calculate total expected snowfall
-   - Determine temperature ranges
-   - Provide an overall assessment of snow conditions
-   - The analysis considers factors like:
-   - Amount of snowfall
-   - Temperature (to determine snow quality)
-   - Wind conditions
-   - Probability of precipitation
+_-_ The analyzeSnowConditions function examines the forecast data to:
+
+- Count expected snow days
+- Calculate total expected snowfall
+- Determine temperature ranges
+- Provide an overall assessment of snow conditions
+- The analysis considers factors like:
+- Amount of snowfall
+- Temperature (to determine snow quality)
+- Wind conditions
+- Probability of precipitation
 
 ## 4. Fallback Mechanism
-*-* The application includes a robust fallback system:
 
-   - If the API key is missing or invalid, it uses mock data
-   - If the API calls fail for any reason, it attempts to use mock data as a fallback
-   - The mock data system provides realistic weather data for popular ski resorts
+_-_ The application includes a robust fallback system:
+
+- If the API key is missing or invalid, it uses mock data
+- If the API calls fail for any reason, it attempts to use mock data as a fallback
+- The mock data system provides realistic weather data for popular ski resorts
 
 ## 5. User Interface
-*-* The UI is designed to be clean and responsive:
 
-   - A search form at the top allows users to enter a ski resort name
-   - When results are displayed, they include:
-   - Current weather conditions with temperature, humidity, wind, etc.
-   - A 7-day forecast showing daily weather conditions
-   - A snow condition analysis with an overall assessment
-   - Weather icons visually represent different weather conditions
-   - Temperature is displayed in Celsius
-   - The design is responsive and works on both desktop and mobile devices
+_-_ The UI is designed to be clean and responsive:
+
+- A search form at the top allows users to enter a ski resort name
+- When results are displayed, they include:
+- Current weather conditions with temperature, humidity, wind, etc.
+- A 7-day forecast showing daily weather conditions
+- A snow condition analysis with an overall assessment
+- Weather icons visually represent different weather conditions
+- Temperature is displayed in Celsius
+- The design is responsive and works on both desktop and mobile devices
 
 ## 6. Error Handling
-*-* The application includes comprehensive error handling:
 
-   - If a resort is not found, it displays a specific error message
-   - If there's an API error, it provides a detailed error message based on the error type
-   - If all else fails, it falls back to mock data to ensure the user gets some response
+_-_ The application includes comprehensive error handling:
+
+- If a resort is not found, it displays a specific error message
+- If there's an API error, it provides a detailed error message based on the error type
+- If all else fails, it falls back to mock data to ensure the user gets some response
 
 ## 7. Technical Implementation Details
-*-* API Integration:
-   - The application uses free tier OpenWeatherMap APIs
-   - It combines multiple API calls to create a comprehensive weather report
-   - All API calls include proper error handling and response validation
 
-*-* Data Transformation:
-   - The application transforms the raw API data into a format suitable for display
-   - It calculates additional metrics like snow condition assessments
-   - It handles unit conversions (e.g., Kelvin to Celsius) where needed
+_-_ API Integration:
 
-*-* Caching and Performance:
-   - The application doesn't implement caching yet, but this could be added to reduce API calls
-   - API responses are processed efficiently to minimize memory usage
+- The application uses free tier OpenWeatherMap APIs
+- It combines multiple API calls to create a comprehensive weather report
+- All API calls include proper error handling and response validation
+
+_-_ Data Transformation:
+
+- The application transforms the raw API data into a format suitable for display
+- It calculates additional metrics like snow condition assessments
+- It handles unit conversions (e.g., Kelvin to Celsius) where needed
+
+_-_ Caching and Performance:
+
+- The application doesn't implement caching yet, but this could be added to reduce API calls
+- API responses are processed efficiently to minimize memory usage
 
 ## 8. Future Enhancements
-*-* The application could be enhanced with:
 
-   - User accounts to save favorite ski resorts
-   - Historical weather data comparison
-   - Snow depth reports from additional data sources
-   - Trail status information
-   - Integration with ski resort APIs for lift status
-   - Caching to reduce API calls and improve performance
-   - This detailed explanation covers how the application works from the user's search input all the way to displaying the weather forecast and snow condition analysis.
+_-_ The application could be enhanced with:
+
+- User accounts to save favorite ski resorts
+- Historical weather data comparison
+- Snow depth reports from additional data sources
+- Trail status information
+- Integration with ski resort APIs for lift status
+- Caching to reduce API calls and improve performance
+- This detailed explanation covers how the application works from the user's search input all the way to displaying the weather forecast and snow condition analysis.

@@ -1,20 +1,31 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-async function analyzeResortConditions(resort, weatherData, nearbyResorts = []) {
-  console.log('\n=== Starting resort analysis ===\n');
+async function analyzeResortConditions(
+  resort,
+  weatherData,
+  nearbyResorts = [],
+) {
+  console.log("\n=== Starting resort analysis ===\n");
   try {
-    console.log('Initializing Gemini model...');
-    const model = genAI.getGenerativeModel({ 
-      model: 'models/gemini-1.5-flash-latest'
+    console.log("Initializing Gemini model...");
+    const model = genAI.getGenerativeModel({
+      model: "models/gemini-2.0-flash",
     });
 
     // Calculate some helpful metrics
-    const snowDaysCount = weatherData.daily.filter(day => day.snow > 0).length;
-    const totalSnowfall = weatherData.daily.reduce((sum, day) => sum + (day.snow || 0), 0);
-    const avgTemp = weatherData.daily.reduce((sum, day) => sum + day.temp.day, 0) / weatherData.daily.length;
+    const snowDaysCount = weatherData.daily.filter(
+      (day) => day.snow > 0,
+    ).length;
+    const totalSnowfall = weatherData.daily.reduce(
+      (sum, day) => sum + (day.snow || 0),
+      0,
+    );
+    const avgTemp =
+      weatherData.daily.reduce((sum, day) => sum + day.temp.day, 0) /
+      weatherData.daily.length;
 
     // Create a structured prompt for Gemini
     const prompt = `As a ski resort analyst, analyze the conditions for ${resort} ski resort. Format your response exactly as shown below, keeping the section headers and maintaining clear separation between sections:
@@ -43,69 +54,91 @@ Week overview:
 - Average temperature: ${avgTemp.toFixed(1)}°C
 
 Daily forecast (next 5 days):
-${weatherData.daily.slice(0, 5).map(day => `${new Date(day.dt * 1000).toLocaleDateString()}: ${day.temp.day}°C, Snow: ${day.snow || 0}mm, ${day.weather[0].description}`).join('\n')}
+${weatherData.daily
+  .slice(0, 5)
+  .map(
+    (day) =>
+      `${new Date(day.dt * 1000).toLocaleDateString()}: ${day.temp.day}°C, Snow: ${day.snow || 0}mm, ${day.weather[0].description}`,
+  )
+  .join("\n")}
 
-${nearbyResorts.length > 0 ? `Nearby resorts:\n${nearbyResorts.map(resort => `${resort.name} (${resort.distance}km away)`).join('\n')}` : 'No nearby resorts available'}`;
+${nearbyResorts.length > 0 ? `Nearby resorts:\n${nearbyResorts.map((resort) => `${resort.name} (${resort.distance}km away)`).join("\n")}` : "No nearby resorts available"}`;
 
-    console.log('API Key length:', process.env.GEMINI_API_KEY?.length || 'not set');
-    console.log('Sending prompt to Gemini for resort:', resort);
+    console.log(
+      "API Key length:",
+      process.env.GEMINI_API_KEY?.length || "not set",
+    );
+    console.log("Sending prompt to Gemini for resort:", resort);
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const analysis = response.text();
 
-    console.log('\n=== Raw AI response start ===\n');
+    console.log("\n=== Raw AI response start ===\n");
     console.log(analysis);
-    console.log('\n=== Raw AI response end ===\n');
+    console.log("\n=== Raw AI response end ===\n");
 
     // Updated regex patterns with # headers
     const sections = {
-      conditions: (analysis.match(/# SNOW CONDITIONS\n([\s\S]*?)(?=# BEST DAYS|$)/) || [])[1] || '',
-      bestDays: (analysis.match(/# BEST DAYS\n([\s\S]*?)(?=# RESORT CHOICE|$)/) || [])[1] || '',
-      alternatives: (analysis.match(/# RESORT CHOICE\n([\s\S]*?)(?=# SKIER ADVICE|$)/) || [])[1] || '',
-      advice: (analysis.match(/# SKIER ADVICE\n([\s\S]*?)(?=$)/) || [])[1] || ''
+      conditions:
+        (analysis.match(/# SNOW CONDITIONS\n([\s\S]*?)(?=# BEST DAYS|$)/) ||
+          [])[1] || "",
+      bestDays:
+        (analysis.match(/# BEST DAYS\n([\s\S]*?)(?=# RESORT CHOICE|$)/) ||
+          [])[1] || "",
+      alternatives:
+        (analysis.match(/# RESORT CHOICE\n([\s\S]*?)(?=# SKIER ADVICE|$)/) ||
+          [])[1] || "",
+      advice:
+        (analysis.match(/# SKIER ADVICE\n([\s\S]*?)(?=$)/) || [])[1] || "",
     };
 
     // Clean up sections
-    Object.keys(sections).forEach(key => {
+    Object.keys(sections).forEach((key) => {
       if (sections[key]) {
         sections[key] = sections[key]
           .trim()
-          .replace(/^\[|\]$/g, '') // Remove square brackets
-          .replace(/^\s*[\r\n]/gm, '')
-          .replace(/^[^a-zA-Z0-9]*/, '');
+          .replace(/^\[|\]$/g, "") // Remove square brackets
+          .replace(/^\s*[\r\n]/gm, "")
+          .replace(/^[^a-zA-Z0-9]*/, "");
       }
     });
 
-    console.log('Parsed sections:', JSON.stringify(sections, null, 2));
+    console.log("Parsed sections:", JSON.stringify(sections, null, 2));
 
-    const hasAllSections = Object.values(sections).every(section => section.length > 0);
+    const hasAllSections = Object.values(sections).every(
+      (section) => section.length > 0,
+    );
 
     if (!hasAllSections) {
-      console.warn('Missing sections in AI response:', {
+      console.warn("Missing sections in AI response:", {
         hasConditions: sections.conditions.length > 0,
         hasBestDays: sections.bestDays.length > 0,
         hasAlternatives: sections.alternatives.length > 0,
-        hasAdvice: sections.advice.length > 0
+        hasAdvice: sections.advice.length > 0,
       });
     }
 
     return {
       analysis,
       structured: {
-        snowConditions: sections.conditions || 'No snow conditions analysis available.',
-        bestDays: sections.bestDays || 'No best days recommendations available.',
-        alternativeResorts: sections.alternatives || 'No alternative resort recommendations available.',
-        advice: sections.advice || 'No specific skier advice available.'
-      }
+        snowConditions:
+          sections.conditions || "No snow conditions analysis available.",
+        bestDays:
+          sections.bestDays || "No best days recommendations available.",
+        alternativeResorts:
+          sections.alternatives ||
+          "No alternative resort recommendations available.",
+        advice: sections.advice || "No specific skier advice available.",
+      },
     };
   } catch (error) {
-    console.error('Error in resort analysis:', error);
-    console.error('Full error details:', JSON.stringify(error, null, 2));
+    console.error("Error in resort analysis:", error);
+    console.error("Full error details:", JSON.stringify(error, null, 2));
     return null;
   }
 }
 
 module.exports = {
-  analyzeResortConditions
+  analyzeResortConditions,
 };
