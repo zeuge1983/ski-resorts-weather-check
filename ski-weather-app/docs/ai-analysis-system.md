@@ -28,12 +28,13 @@ The AI analysis system consists of three main components:
 
 ```javascript
 const model = genAI.getGenerativeModel({
-  model: "models/gemini-2.0-flash",
+  model: "models/gemini-2.5-flash",
 });
 ```
 
-We use Google's Gemini 2.0 Flash model because:
+We use Google's Gemini 2.5 Flash model as example because:
 
+- Free of use
 - Optimized for structured output
 - Fast response times
 - Good at following formatted instructions
