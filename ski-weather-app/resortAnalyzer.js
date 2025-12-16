@@ -12,7 +12,7 @@ async function analyzeResortConditions(
   try {
     console.log("Initializing Gemini model...");
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.0-flash",
+      model: "models/gemini-2.5-flash",
     });
 
     // Calculate some helpful metrics
